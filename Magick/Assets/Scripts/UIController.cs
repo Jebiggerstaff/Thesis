@@ -13,7 +13,6 @@ public class UIController : MonoBehaviour
 {
     #region Gameobjects
     public GameObject firstPersonGroup;
-    public GameObject PauseMenu;
     public GameObject spellDisplay;
     public GameObject HUD;
     public GameObject SpellbookUI;
@@ -22,13 +21,6 @@ public class UIController : MonoBehaviour
     public int spellsknown=0;
 
     public GameObject[] SpellSlots;
-
-    #region Buttons
-    public Button PauseToGameButton;
-    public Button PauseToOptionsButton;
-    public Button PauseToCreditsButton;
-    public Button PauseToMainButton;
-    #endregion
 
     #region KnowsSpells
     bool knowsFireball = false;
@@ -40,8 +32,6 @@ public class UIController : MonoBehaviour
     bool knowsPolymorph = false;
     bool knowsDuplicate = false;
     #endregion
-
-    bool InOptionsMenu = false;
 
     private MagickPathToMastery controls;
 
@@ -57,71 +47,11 @@ public class UIController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-       
-        PauseToGameButton.onClick.AddListener(PauseToGame);
-        PauseToOptionsButton.onClick.AddListener(PauseToOptions);
-        PauseToCreditsButton.onClick.AddListener(PauseToCredits);
-        PauseToMainButton.onClick.AddListener(PauseToMain);
-
-
     }
-     
-    private void Update()
-    {
-        //open pause menu
-        if (controls.UI.PauseButton.triggered && InOptionsMenu == false)
-        {
-            InOptionsMenu = true;
-            firstPersonGroup.GetComponent<FirstPersonAIO>().playerCanMove = false;
-            firstPersonGroup.GetComponent<FirstPersonAIO>().enableCameraMovement = false;
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            HUD.SetActive(false);
-            PauseMenu.SetActive(true);
-            spellDisplay.GetComponent<SpellDisplay>().Clear();
-        }
-        //close pause menu
-        else if (controls.UI.PauseButton.triggered && InOptionsMenu == true)
-        {
-            InOptionsMenu = false;
-            firstPersonGroup.GetComponent<FirstPersonAIO>().playerCanMove = true;
-            firstPersonGroup.GetComponent<FirstPersonAIO>().enableCameraMovement = true;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            HUD.SetActive(true);
-            PauseMenu.SetActive(false);
-        }
-    }
-
-    void PauseToGame()
-    {
-        InOptionsMenu = false;
-        firstPersonGroup.GetComponent<FirstPersonAIO>().playerCanMove = true;
-        firstPersonGroup.GetComponent<FirstPersonAIO>().enableCameraMovement = true;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        HUD.SetActive(true);
-        PauseMenu.SetActive(false);
-    }
-
-    void PauseToOptions()
-    {
-        Debug.Log("open Options");
-    }
-
-    void PauseToCredits()
-    {
-        Debug.Log("open Credits");
-    }
-
-    void PauseToMain()
-    {
-        Application.Quit();
-    }
+   
     public void AddToSpellbook(string spellname)
     {
-        
-
+       
         switch (spellname)
         {
             #region Fireball

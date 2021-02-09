@@ -10,6 +10,8 @@ public class SpellCast : MonoBehaviour
     public OVRInput.Button FireSpellButton;
     public OVRInput.Button gestureActiveButton;
 
+    public GameObject Aimline;
+
 
     public GameObject fireball;
     public GameObject Crate;    
@@ -60,48 +62,56 @@ public class SpellCast : MonoBehaviour
             case "Plus":
                 fireballUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
             #region Telekinesis
             case "Triangle":
                 telekinesisUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
             #region Resize
             case "Letter-S":
                 ResizeUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
             #region Conjure Crate
             case "Square":
                 ConjureCrateUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
             #region Push
             case "L":
                 PushUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
             #region Pull
             case "Inverted L":
                 PullUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
             #region Polymorph
             case "Circle":
                 polymorphUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
             #region Duplicate
             case "Heart":
                 DuplicateUI.SetActive(true);
                 activeSpell = data.name;
+                Aimline.SetActive(true);
                 break;
             #endregion
 
@@ -111,6 +121,8 @@ public class SpellCast : MonoBehaviour
     }
     private void Update()
     {
+
+        
 
         if (OngoingTelekinesis)
         {
@@ -134,7 +146,6 @@ public class SpellCast : MonoBehaviour
 
             //moves object closer/farther
             move = spellGuide.transform.localPosition;
-            Debug.LogWarning(Vector3.Distance(spellGuide.transform.position, transform.position));
             if (OVRInput.Get(OVRInput.Button.PrimaryThumbstickDown) && Vector3.Distance(spellGuide.transform.position, transform.position) > 3)
             {
                 move.z -= .1f;
@@ -162,6 +173,8 @@ public class SpellCast : MonoBehaviour
         //Fires off the Spell
         if (OVRInput.Get(FireSpellButton)) {
 
+            Aimline.SetActive(false);
+
             switch (activeSpell){
 
                 #region Fireball
@@ -188,7 +201,6 @@ public class SpellCast : MonoBehaviour
                         OngoingTelekinesis = true;
                     }
                     telekinesisUI.SetActive(false);
-                    activeSpell = "";
                     break;
                 #endregion
                 #region Resize
@@ -200,7 +212,6 @@ public class SpellCast : MonoBehaviour
                         OngoingResize = true;
                     }
                     ResizeUI.SetActive(false);
-                    activeSpell = "";
                     break;
                 #endregion
                 #region Conjure Crate
@@ -268,9 +279,8 @@ public class SpellCast : MonoBehaviour
                     break;
             }
         }
-
         //Clear All UI when the player starts drawing a new symbol
-        if (OVRInput.Get(gestureActiveButton))
+        if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger) && activeSpell != "")
         {
             fireballUI.SetActive(false);
             telekinesisUI.SetActive(false);
@@ -293,10 +303,11 @@ public class SpellCast : MonoBehaviour
                 spellTarget = null;
             }
 
-
+            Aimline.SetActive(false);
             activeSpell = "";
-            spellGuide.transform.localPosition=new Vector3(0,0,3f);
+            spellGuide.transform.localPosition = new Vector3(0, 0, 3f);
         }
+
     }
 
     void getTarget()

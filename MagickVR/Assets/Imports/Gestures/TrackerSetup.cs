@@ -52,7 +52,7 @@ public class TrackerSetup : MonoBehaviour {
         tracker.AddGesture("L", new LGesture(.8f));
         tracker.AddGesture("Inverted L", new UpsideDownLGesture(.8f));
         tracker.AddGesture("Circle", new CircleGesture(.8f));
-        tracker.AddGesture("Triangle", new TriangleGesture(.8f));
+        tracker.AddGesture("Triangle", new TriangleGesture(1.2f));
         tracker.AddGesture("Heart", new HeartGesture(.8f));
         tracker.AddGesture("Letter-S", new Gesture().AddChecks(new List<Check> {
             new ArcCheck(new Vector3(.5f, .5f, 0), -90, new Vector3(0,.5f,0)),

@@ -228,6 +228,7 @@ public class SpellDisplay : MonoBehaviour
                 case "qqq":
                     UI.GetComponent<UIController>().AddToSpellbook(displayText);
                     fireballUI.SetActive(true);
+
                     break;
                 #endregion
                 #region Telekinesis
