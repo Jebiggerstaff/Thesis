@@ -265,10 +265,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Magick Can be Cast in 2 different ways. one of which requires the user
-    to draw symbols to evoke different spells. the other requres the user to harness
-    both the positive(Q/A) and negative(E/B) energies of magick, and combine them
-    into spells
+  m_Text: Magick is cast in two steps. First you must hold the right hand index trigger
+    draw the symbol of the spell you want to cast, then press the A button to unleash
+    the spell. To cancel a spell press the index trigger button again.
 --- !u!222 &25191419
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -482,7 +481,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!120 &133432068
 LineRenderer:
   m_ObjectHideFlags: 0

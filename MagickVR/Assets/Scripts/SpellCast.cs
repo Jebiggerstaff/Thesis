@@ -280,7 +280,7 @@ public class SpellCast : MonoBehaviour
             }
         }
         //Clear All UI when the player starts drawing a new symbol
-        if (OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger) && activeSpell != "")
+        if (OVRInput.Get(OVRInput.Button.SecondaryIndexTrigger) && activeSpell != "")
         {
             fireballUI.SetActive(false);
             telekinesisUI.SetActive(false);
