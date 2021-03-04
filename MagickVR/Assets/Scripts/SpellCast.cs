@@ -59,7 +59,7 @@ public class SpellCast : MonoBehaviour
         switch (data.name){
 
             #region Fireball
-            case "Plus":
+            case "Cross":
                 fireballUI.SetActive(true);
                 activeSpell = data.name;
                 Aimline.SetActive(true);
@@ -178,7 +178,7 @@ public class SpellCast : MonoBehaviour
             switch (activeSpell){
 
                 #region Fireball
-                case "Plus":
+                case "Cross":
                     layerMask = ~layerMask;
                     if (Physics.Raycast(new Ray(transform.position, transform.forward), out hit, 30f, layerMask))
                     {
@@ -248,7 +248,6 @@ public class SpellCast : MonoBehaviour
                 case "Circle":
                     polymorphUI.SetActive(false);
                     getTarget();
-
                     if (spellTarget.GetComponent<Rigidbody>() != null)
                     {
                         if (spellTarget.name == "Cube" || spellTarget.name == "Cube(Clone)")
