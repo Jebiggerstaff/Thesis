@@ -7,6 +7,11 @@ public class Fireball : MonoBehaviour
     public float radius = 5f;
     public float power = 100f;
 
+    private void Update()
+    {
+        this.GetComponent<Rigidbody>().AddRelativeForce(Vector3.forward*10);
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.DrawSphere(this.transform.position, radius);

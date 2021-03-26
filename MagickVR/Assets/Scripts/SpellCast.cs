@@ -7,9 +7,11 @@ public class SpellCast : MonoBehaviour
 {
     public GameObject TrackingSpace;
     public OVRInput.Controller Controller;
-    public OVRInput.Button gestureActiveButton;
+    public OVRInput.Button PointerFingerTrigger;
+    public OVRInput.Button SecondaryTrigger;
     public OVRInput.Button TelekinesisFarther;
     public OVRInput.Button TelekinesisCloser;
+    public GameObject Otherhand;
 
     public GameObject Aimline;
 
@@ -21,7 +23,6 @@ public class SpellCast : MonoBehaviour
 
     public GameObject spellGuide;
     public GameObject spellTarget;
-    private string activeSpell="";
 
     #region UISpellGameobjects
     public GameObject fireballUI;
@@ -34,53 +35,41 @@ public class SpellCast : MonoBehaviour
     public GameObject DuplicateUI;
     #endregion
 
-    Transform unchild;
-    Text text; //The text object used to display spells on screen
-    string input = ""; //Current spell input
-    string displayText = ""; //Used in conjunction with Text text
     public float ForceMod = 1000f; //Used to move objects in telekinesis
     public float spellLongevity = 5f; //Length of spell effects
     float targetDistance; //Distance between target and object (Telekinesis)
     bool playerTouching; //Determines if player is touching object that is being targeted
     Vector3 move; //Used to move objects in telekinesis
-    double spellEffectsTimer = 0; //Used to countdown how long a spell lasts
-    Material mat = null;//Used for telekinesis to get material of spellTarget;
-    Vector3 polyTemp;
     float startRot= 0;
-
-    int layerMask = 0 << 8;
-    RaycastHit hit;
+    float dist = 0f;
+    float prevDist = 0f;
 
     private GameObject CreatedFireball;
 
-    private bool OngoingTelekinesis;
+    private bool OngoingTelekinesis=false;
     private bool OngoingResize;
     private bool OngoingFireball;
+    public bool Conjuringbox = false;
+    public bool Resizing = false;
+    bool BoxSpawned = false;
+    Vector3 polyTemp;
+    bool duplicated = false;
+    bool polymorphing = false;
+    public Material boxTeleMat;
+    public Material boxNorm;
 
     private void Update()
     {
+        dist = Vector3.Distance(this.gameObject.transform.position, Otherhand.transform.position);
 
         if (OngoingTelekinesis)
         {
-            //Debug.LogWarning("Target: " + spellTarget.name);
             targetDistance = Vector3.Distance(spellGuide.transform.position, spellTarget.transform.position);
-            ForceMod = 500;
-            ForceMod = ForceMod * targetDistance;
-            if (targetDistance >= .2 && playerTouching == false)
-            {
-            spellTarget.GetComponent<Rigidbody>().velocity = spellTarget.GetComponent<Rigidbody>().velocity / 4f;
-            spellTarget.GetComponent<Rigidbody>().AddForce((spellGuide.transform.position - spellTarget.transform.position).normalized * (ForceMod) * Time.smoothDeltaTime, mode: ForceMode.Impulse);
+            ForceMod = 10;
+            if (targetDistance >= .2 && playerTouching == false){
+                spellTarget.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+                spellTarget.transform.position = Vector3.Lerp(spellTarget.transform.position, spellGuide.transform.position, ForceMod * Time.deltaTime);
             }
-            else if (playerTouching == true)
-            {
-            spellTarget.GetComponent<Rigidbody>().velocity = new Vector3(0, 0, 0);
-            }
-            else if (targetDistance <= .15 && spellTarget.GetComponent<Rigidbody>().velocity.x <= .2f && spellTarget.GetComponent<Rigidbody>().velocity.y <= .2f && spellTarget.GetComponent<Rigidbody>().velocity.z <= .2f)
-            {
-               spellTarget.GetComponent<Rigidbody>().velocity += new Vector3(Random.Range(-.05f, .05f), Random.Range(-.05f, .05f), Random.Range(-.05f, .05f));
-            }
-
-            //moves object closer/farther
             move = spellGuide.transform.localPosition;
             if (OVRInput.Get(TelekinesisCloser) && Vector3.Distance(spellGuide.transform.position, transform.position) > 3)
             {
@@ -94,54 +83,127 @@ public class SpellCast : MonoBehaviour
             }
         }
 
-        if (OngoingResize)
-        {
-            if (spellTarget.transform.lossyScale.magnitude <= polyTemp.magnitude * 1.5 && OVRInput.Get(OVRInput.Button.PrimaryThumbstickUp))
-            {
-                spellTarget.transform.localScale += new Vector3(.01f, .01f, .01f);
-            }
-            else if (spellTarget.transform.lossyScale.magnitude >= polyTemp.magnitude * .5 && OVRInput.Get(OVRInput.Button.PrimaryThumbstickDown))
-            {
-                spellTarget.transform.localScale -= new Vector3(.01f, .01f, .01f);
-            }
-        }
+        if (OVRInput.Get(SecondaryTrigger) && OVRInput.Get(PointerFingerTrigger))
+            Resizing = true;
+        else
+            Resizing = false;
 
         //When You Grip
-        if (OVRInput.Get(gestureActiveButton)) {
+        if (OVRInput.Get(PointerFingerTrigger)) {
 
             #region Telekinesis
-            if (!OngoingTelekinesis || !OngoingFireball)
+            if (!OngoingTelekinesis && !OngoingFireball && !Conjuringbox)
             {
                 Aimline.SetActive(false);
-                getTarget();
+
+                if(!OngoingTelekinesis)
+                    getTarget();
+
                 if (spellTarget != null)
                 {
                     if (spellTarget.GetComponent<Rigidbody>() != null)
                     {
+                        spellTarget.GetComponent<Renderer>().material = boxTeleMat;
                         OngoingTelekinesis = true;
                     }
-                    telekinesisUI.SetActive(false);
                 }
             }
             #endregion
 
             #region Fireball
-            getTarget();
-            if (spellTarget == null)
+            if (!OngoingTelekinesis || !Conjuringbox || !OngoingResize)
             {
-                if (startRot == 0f)
-                    startRot = this.transform.rotation.z;
-
-                if(this.transform.rotation.z - startRot > .5|| this.transform.rotation.z - startRot < -.5)
+                getTarget();
+                if (spellTarget == null)
                 {
-                    if (CreatedFireball == null)
+                    if (startRot == 0f)
+                        startRot = this.transform.rotation.z;
+
+                    if (this.transform.rotation.z - startRot > .5 || this.transform.rotation.z - startRot < -.5)
+                    {
+                        if (CreatedFireball == null)
+                        {
+                            if (this.gameObject.name == "Right Hand")
+                                CreatedFireball = Instantiate(fireball, this.transform.position + new Vector3(0, .3f, .3f), new Quaternion(0, 0, 0, 0), this.transform);
+                            else
+                                CreatedFireball = Instantiate(fireball, this.transform.position + new Vector3(0, .3f, -.3f), new Quaternion(0, 0, 0, 0), this.transform);
+                        }
+                        OngoingFireball = true;
+                    }
+                }
+            }
+            #endregion
+
+            #region Resize
+            getTarget();
+            if (spellTarget == Otherhand.GetComponent<SpellCast>().spellTarget)
+            {
+                if (Resizing == true && Otherhand.GetComponent<SpellCast>().Resizing == true)
+                {
+
+                    if (prevDist == 0f)
+                    {
+                        prevDist = dist;
+                        polyTemp = spellTarget.transform.lossyScale;
+                    }
+
+                    if (this.gameObject.name == "Right Hand")
+                    {
+
+                        if (dist > prevDist && spellTarget.transform.lossyScale.magnitude <= polyTemp.magnitude * 1.5)
+                        {
+                            spellTarget.transform.localScale += new Vector3(.01f, .01f, .01f);
+                        }
+                        else if (dist < prevDist && spellTarget.transform.lossyScale.magnitude >= polyTemp.magnitude * .5)
+                        {
+                            spellTarget.transform.localScale -= new Vector3(.01f, .01f, .01f);
+                        }
+                        
+
+                    }
+                }
+                
+            }
+            #endregion//LIMIT RESIZE
+
+            #region ConjureBox
+            if (!OngoingTelekinesis && !OngoingFireball && !OngoingResize && !Otherhand.GetComponent<SpellCast>().OngoingFireball)
+            {
+                getTarget();
+                if (spellTarget == null)
+                {
+                    Conjuringbox = true;
+                    if (Otherhand.GetComponent<SpellCast>().Conjuringbox == true && BoxSpawned != true)
                     {
                         if (this.gameObject.name == "Right Hand")
-                            CreatedFireball = Instantiate(fireball, this.transform.position + new Vector3(0, .3f, .3f), new Quaternion(0, 0, 0, 0), this.transform);
-                        else
-                            CreatedFireball = Instantiate(fireball, this.transform.position + new Vector3(0, -.3f, -.3f), new Quaternion(0, 0, 0, 0), this.transform);
+                        {
+                            Vector3 midPoint = (this.transform.position + Otherhand.transform.position) / 2f;
+                            Instantiate(Crate, midPoint, new Quaternion(0, 0, 0, 0));
+                            BoxSpawned = true;
+                        }
                     }
-                    OngoingFireball = true;
+                }
+            }
+            #endregion
+
+            #region Duplicate
+            getTarget();
+            if (spellTarget == Otherhand.GetComponent<SpellCast>().spellTarget)
+            {
+                if (startRot == 0f)
+                    startRot = this.transform.rotation.y;
+
+                if (this.transform.rotation.y - startRot > .3 || this.transform.rotation.y - startRot < -.3)
+                {
+                    if (duplicated == false)
+                    {
+                        string name = spellTarget.name;
+                        GameObject clone = Instantiate(spellTarget, spellTarget.transform.position, spellTarget.transform.rotation);
+                        clone.name = name;
+                        spellTarget = clone;
+                        duplicated = true;
+                        
+                    }
                 }
             }
             #endregion
@@ -155,7 +217,7 @@ public class SpellCast : MonoBehaviour
                 CreatedFireball.GetComponent<Fireball>().enabled = true;
                 CreatedFireball.GetComponent<Rigidbody>().useGravity = true;
                 CreatedFireball.transform.parent = null;
-                CreatedFireball.GetComponent<Rigidbody>().velocity = TrackingSpace.transform.rotation * OVRInput.GetLocalControllerVelocity(Controller)*5;
+                CreatedFireball.GetComponent<Rigidbody>().velocity = TrackingSpace.transform.rotation * OVRInput.GetLocalControllerVelocity(Controller)*30;
                 CreatedFireball.GetComponent<Rigidbody>().angularVelocity = OVRInput.GetLocalControllerAngularVelocity(Controller);
                 CreatedFireball = null;
             }
@@ -164,6 +226,11 @@ public class SpellCast : MonoBehaviour
             {
                 OngoingTelekinesis = false;
                 spellTarget.GetComponent<Rigidbody>().useGravity = true;
+                spellTarget.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+                spellTarget.GetComponent<Rigidbody>().velocity = TrackingSpace.transform.rotation * OVRInput.GetLocalControllerVelocity(Controller) * 5;
+                spellTarget.GetComponent<Rigidbody>().angularVelocity = OVRInput.GetLocalControllerAngularVelocity(Controller);
+                if (spellTarget != Otherhand.GetComponent<SpellCast>().spellTarget)
+                    spellTarget.GetComponent<Renderer>().material = boxNorm;
                 spellTarget = null;
             }
 
@@ -174,9 +241,14 @@ public class SpellCast : MonoBehaviour
             }
 
             startRot = 0;
+            prevDist = 0;
+            Conjuringbox = false;
+            BoxSpawned = false;
+            duplicated = false;
+
+            OngoingFireball = false;
 
             Aimline.SetActive(true);
-            activeSpell = "";
             spellGuide.transform.localPosition = new Vector3(0, 0, 3f);
         }
 
@@ -189,12 +261,12 @@ public class SpellCast : MonoBehaviour
         int layerMask = 0 << 8;
         layerMask = ~layerMask;
 
-        if (Physics.Raycast(ray, out hit, 50, layerMask))
+        if (Physics.Raycast(ray, out hit, 50, layerMask) &&!OngoingTelekinesis)
         {
             if (hit.collider != null && hit.collider.gameObject.layer != 8 && hit.collider.gameObject.layer != 9 && hit.collider.gameObject.layer != 2)
             {
                 spellTarget = hit.transform.gameObject;
-                unchild = spellTarget.transform.parent;
+                //unchild = spellTarget.transform.parent;
             }
         }
         /*
