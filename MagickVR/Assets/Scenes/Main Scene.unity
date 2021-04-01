@@ -509,7 +509,7 @@ GameObject:
   - component: {fileID: 33560592}
   - component: {fileID: 33560597}
   m_Layer: 0
-  m_Name: Cube (4)
+  m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1269,7 +1269,7 @@ GameObject:
   - component: {fileID: 253681292}
   - component: {fileID: 253681297}
   m_Layer: 0
-  m_Name: Cube (1)
+  m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1600,7 +1600,8 @@ MonoBehaviour:
   Conjuringbox: 0
   Resizing: 0
   boxTeleMat: {fileID: 2100000, guid: cd43e49f9ef216047ae3bc8ce3b51e24, type: 2}
-  boxNorm: {fileID: 2100000, guid: 0c14febc51a65aa479697493a9fe74b2, type: 2}
+  NormMat: {fileID: 2100000, guid: 0c14febc51a65aa479697493a9fe74b2, type: 2}
+  ballTeleMat: {fileID: 2100000, guid: 38b18c9cc368989438c8dfefa4c5815d, type: 2}
 --- !u!1 &311061026
 GameObject:
   m_ObjectHideFlags: 0
@@ -1988,7 +1989,7 @@ GameObject:
   - component: {fileID: 382089143}
   - component: {fileID: 382089148}
   m_Layer: 0
-  m_Name: Cube (2)
+  m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2348,7 +2349,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: ce816f2e6abb0504092c23ed9b970dfd, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -3167,7 +3168,7 @@ GameObject:
   - component: {fileID: 960116113}
   - component: {fileID: 960116118}
   m_Layer: 0
-  m_Name: Cube (5)
+  m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3446,7 +3447,8 @@ MonoBehaviour:
   Conjuringbox: 0
   Resizing: 0
   boxTeleMat: {fileID: 2100000, guid: cd43e49f9ef216047ae3bc8ce3b51e24, type: 2}
-  boxNorm: {fileID: 2100000, guid: 0c14febc51a65aa479697493a9fe74b2, type: 2}
+  NormMat: {fileID: 2100000, guid: 0c14febc51a65aa479697493a9fe74b2, type: 2}
+  ballTeleMat: {fileID: 2100000, guid: 38b18c9cc368989438c8dfefa4c5815d, type: 2}
 --- !u!135 &1022684686
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -4430,7 +4432,7 @@ GameObject:
   - component: {fileID: 1313146862}
   - component: {fileID: 1313146867}
   m_Layer: 0
-  m_Name: Cube (3)
+  m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5806,7 +5808,7 @@ Transform:
   - {fileID: 33560596}
   - {fileID: 960116117}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1823749788
 Transform:
@@ -6323,6 +6325,11 @@ PrefabInstance:
       propertyPath: m_CastShadows
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7798050930052320669, guid: f18b8aacd62579b439103999110ac404,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
     - target: {fileID: 7798050930052320670, guid: f18b8aacd62579b439103999110ac404,
         type: 3}
       propertyPath: m_LocalPosition.x
