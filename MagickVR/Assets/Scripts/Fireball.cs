@@ -4,25 +4,12 @@ using UnityEngine;
 
 public class Fireball : MonoBehaviour
 {
-    float lifeTimer=1f;
-
     public float radius = 5f;
     public float power = 100f;
 
-    void Awake()
+    private void Update()
     {
-        Vector3 explosionPos = this.transform.position;
-        Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
-        
-        foreach (Collider hit in colliders)
-        {
-            Rigidbody rb = hit.GetComponent<Rigidbody>();
-
-            if (rb != null && rb.gameObject.layer != 8)
-            {
-                rb.AddExplosionForce(power, explosionPos, radius, 1f, ForceMode.Impulse);          
-            }
-        }
+        this.GetComponent<Rigidbody>().AddRelativeForce(Vector3.forward*10);
     }
 
     private void OnDrawGizmos()
@@ -30,12 +17,23 @@ public class Fireball : MonoBehaviour
         Gizmos.DrawSphere(this.transform.position, radius);
     }
 
-    void Update()
+    private void OnCollisionEnter(Collision collision)
     {
-        if(lifeTimer <= 0f)
+        if (collision.gameObject.tag != "Player")
         {
+            Vector3 explosionPos = this.transform.position;
+            Collider[] colliders = Physics.OverlapSphere(explosionPos, radius);
+
+            foreach (Collider hit in colliders)
+            {
+                Rigidbody rb = hit.GetComponent<Rigidbody>();
+
+                if (rb != null && rb.gameObject.layer != 8)
+                {
+                    rb.AddExplosionForce(power, explosionPos, radius, 1f, ForceMode.Impulse);
+                }
+            }
             Object.Destroy(gameObject);
         }
-        lifeTimer -= Time.deltaTime;
     }
 }
