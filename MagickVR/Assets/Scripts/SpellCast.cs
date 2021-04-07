@@ -41,6 +41,7 @@ public class SpellCast : MonoBehaviour
     bool playerTouching; //Determines if player is touching object that is being targeted
     Vector3 move; //Used to move objects in telekinesis
     float startRot= 0;
+    Vector3 startPos;
     float dist = 0f;
     float prevDist = 0f;
 
@@ -54,13 +55,21 @@ public class SpellCast : MonoBehaviour
     Vector3 polyTemp;
     bool duplicated = false;
     bool polymorphed = false;
+    bool PushedPulled=false;
     public Material boxTeleMat;
     public Material NormMat;
     public Material ballTeleMat;
+    public Material Highlight;
+    GameObject highlightedObject;
+
+    public AudioClip[] SoundEffects = new AudioClip[0];
 
     private void Update()
     {
         dist = Vector3.Distance(this.gameObject.transform.position, Otherhand.transform.position);
+
+
+        
 
         if (OngoingTelekinesis && spellTarget!=null)
         {
@@ -130,6 +139,8 @@ public class SpellCast : MonoBehaviour
                     getTarget();
                     if (spellTarget != null && Otherhand.GetComponent<SpellCast>().spellTarget != null)
                     {
+                        GetComponent<AudioSource>().clip = SoundEffects[7];
+                        GetComponent<AudioSource>().Play();
                         GameObject x;
                         if (spellTarget.name == "Cube" || spellTarget.name == "Cube(Clone)")
                             x = Instantiate(Ball, spellTarget.transform.position, spellTarget.transform.rotation);
@@ -139,6 +150,7 @@ public class SpellCast : MonoBehaviour
                         x.transform.localScale = spellTarget.transform.localScale;
                         Destroy(spellTarget);
                         spellTarget = null;
+                        
                         Otherhand.GetComponent<SpellCast>().spellTarget = x;
                         polymorphed = true;
                     }
@@ -146,8 +158,38 @@ public class SpellCast : MonoBehaviour
             }
             #endregion
 
+            #region Push/Pull
+            else if (!OVRInput.Get(PointerFingerTrigger))
+            {
+                getTarget();
+                if (spellTarget != null)
+                {
+
+                    if (OVRInput.GetLocalControllerVelocity(Controller).z > .25 )
+                    {
+                        if (PushedPulled == false)
+                        {
+                            GetComponent<AudioSource>().clip = SoundEffects[1];
+                            GetComponent<AudioSource>().Play();
+                            spellTarget.GetComponent<Rigidbody>().AddForce(transform.forward *  700f);
+                            PushedPulled = true;
+                        }
+                    }
+                    else if(OVRInput.GetLocalControllerVelocity(Controller).z < -.25)
+                    {
+                        if (PushedPulled == false)
+                        {
+                            GetComponent<AudioSource>().clip = SoundEffects[2];
+                            GetComponent<AudioSource>().Play();
+                            spellTarget.GetComponent<Rigidbody>().AddForce(-transform.forward * 700f);
+                            PushedPulled = true;
+                        }
+                    }
+                }
+            }
+            #endregion
         }
-        //When You Grip
+
         else if (OVRInput.Get(PointerFingerTrigger)) {
 
             #region Telekinesis
@@ -168,6 +210,9 @@ public class SpellCast : MonoBehaviour
                             spellTarget.GetComponent<Renderer>().material = ballTeleMat;
 
                         OngoingTelekinesis = true;
+                        GetComponent<AudioSource>().clip = SoundEffects[5];
+                        GetComponent<AudioSource>().Play();
+                        GetComponent<AudioSource>().loop = true;
                     }
                 }
             }
@@ -192,6 +237,8 @@ public class SpellCast : MonoBehaviour
                                 CreatedFireball = Instantiate(fireball, this.transform.position + new Vector3(0, .3f, -.3f), new Quaternion(0, 0, 0, 0), this.transform);
                         }
                         OngoingFireball = true;
+                        GetComponent<AudioSource>().clip = SoundEffects[4];
+                        GetComponent<AudioSource>().Play();
                     }
                 }
             }
@@ -213,6 +260,8 @@ public class SpellCast : MonoBehaviour
                             x = Instantiate(Crate, midPoint, new Quaternion(0, 0, 0, 0));
                             x.GetComponent<Renderer>().material = NormMat;
                             BoxSpawned = true;
+                            GetComponent<AudioSource>().clip = SoundEffects[3];
+                            GetComponent<AudioSource>().Play();
                         }
                     }
                 }
@@ -235,6 +284,8 @@ public class SpellCast : MonoBehaviour
                         clone.name = name;
                         spellTarget = clone;
                         duplicated = true;
+                        GetComponent<AudioSource>().clip = SoundEffects[0];
+                        GetComponent<AudioSource>().Play();
 
                     }
                 }
@@ -242,9 +293,24 @@ public class SpellCast : MonoBehaviour
             #endregion
 
         }
-        //When you Let go of the Grip
+
         else
         {
+            getTarget();
+            if (spellTarget != null)
+            {
+                if (spellTarget != Otherhand.GetComponent<SpellCast>().spellTarget)
+                {
+                    highlightedObject = spellTarget;
+                    spellTarget.GetComponent<Renderer>().material = Highlight;
+                }
+            }
+            else if (spellTarget != highlightedObject)
+            {
+                highlightedObject.GetComponent<Renderer>().material = NormMat;
+                highlightedObject = null;
+            }
+
             if (OngoingFireball && CreatedFireball != null)
             {
                 CreatedFireball.GetComponent<Fireball>().enabled = true;
@@ -253,6 +319,8 @@ public class SpellCast : MonoBehaviour
                 CreatedFireball.GetComponent<Rigidbody>().velocity = TrackingSpace.transform.rotation * OVRInput.GetLocalControllerVelocity(Controller) * 30;
                 CreatedFireball.GetComponent<Rigidbody>().angularVelocity = OVRInput.GetLocalControllerAngularVelocity(Controller);
                 CreatedFireball = null;
+                GetComponent<AudioSource>().clip = SoundEffects[6];
+                GetComponent<AudioSource>().Play();
             }
 
             if (OngoingTelekinesis)
@@ -264,6 +332,8 @@ public class SpellCast : MonoBehaviour
                 spellTarget.GetComponent<Rigidbody>().angularVelocity = OVRInput.GetLocalControllerAngularVelocity(Controller);
                 if (spellTarget != Otherhand.GetComponent<SpellCast>().spellTarget)
                     spellTarget.GetComponent<Renderer>().material = NormMat;
+                GetComponent<AudioSource>().Stop();
+                GetComponent<AudioSource>().loop = false;
 
             }
 
@@ -272,18 +342,20 @@ public class SpellCast : MonoBehaviour
                 Resizing = false;
             }
 
-
             polymorphed = false;
             spellTarget = null;
             startRot = 0;
+            startPos = Vector3.zero;
             prevDist = 0;
             Conjuringbox = false;
             BoxSpawned = false;
             duplicated = false;
+            PushedPulled = false;
 
             OngoingFireball = false;
 
             Aimline.SetActive(true);
+
             spellGuide.transform.localPosition = new Vector3(0, 0, 3f);
         }
 
